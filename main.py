@@ -101,24 +101,26 @@ async def get():
 
 # Информация о зарплате
 # Сначала мы всегда проверяем дейтсвует ли еще токен
-@app.get("/salary")
-async def get_salary(token: str = Depends(validate_token)):
+@app.get("/salary/{name}")
+async def get_salary(name: str, token: str = Depends(validate_token)):
     if token not in tokens:
         raise HTTPException(status_code=401, detail="Недействительный токен")
 
     username = token.split("_", 1)[1]
     salary = await asyncio.to_thread(lambda: employees[username]["salary"])
 
-    return {"salary": salary}
+    return {"name": username,
+            "salary": salary}
 
 
 # Информация о дате повышение
 # Здесь тоже мы проверяем дейтсвует ли еще токен
-@app.get("/promotion_date")
+@app.get("/promotion_date/{name}")
 async def get_promotion_date(token: str = Depends(validate_token)):
     username = token.split("_", 1)[1]
     promotion_date = await asyncio.to_thread(lambda: employees[username]["promotion_date"])
-    return {"promotion_date": promotion_date}
+    return {"name": username,
+            "promotion_date": promotion_date}
 
 
 if __name__ == "__main__":
