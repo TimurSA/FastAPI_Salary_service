@@ -19,7 +19,7 @@ from DataBase_Connection import collect_data
 
 app = FastAPI()
 
-# # Вставьте данные о своей базы данных,на котором есть таблица такого формата:
+# # Вставьте данные о своей базе данных PostgreSql,на котором есть таблица такого формата:
 #     Id SERIAL PRIMARY KEY,
 #     username VARCHAR(64) NOT NULL,
 #     password VARCHAR(64) NOT NULL,
