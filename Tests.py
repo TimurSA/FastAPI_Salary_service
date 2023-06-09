@@ -10,7 +10,6 @@ client = TestClient(app)
 async def test_home():
     response = client.get("/")
     assert response.status_code == 200
-    print(response.content)
     assert response.content == b'\n        <html>\n<head>\n    <title>Salary Service</title>\n</head>\n<body>\n    <h1>Welcome to the Salary Service!</h1>\n    <h2>Please go to <a href="http://127.0.0.1:8000/docs">http://127.0.0.1:8000/docs</a> in order to operate the service<h2>\n\n\n</body>\n</html>\n    '
 
 
