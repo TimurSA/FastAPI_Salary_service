@@ -11,7 +11,7 @@ pip install pytest-asyncio
 pip install httpx
 """
 
-Вставьте данные о своей базы данных,на котором есть таблица такого формата:
+Вставьте данные о своей PostgreSql базе данных,на котором есть таблица такого формата:
 
 Id SERIAL PRIMARY KEY,
 username VARCHAR(64) NOT NULL,
