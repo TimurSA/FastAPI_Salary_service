@@ -63,7 +63,7 @@ tokens = {}
 
 def generate_token(username: str) -> str:
     # Генерация токена, который будет действителен в течение 30 минут
-    # Здесь расположена хеш-функция, но для примера просто будет простая строка
+    # Здесь располагается хеш-функция, но для примера просто будет простая строка
     token = "token_" + username
     expiration = datetime.now() + timedelta(minutes=30)
     tokens[token] = expiration
@@ -117,8 +117,12 @@ async def get_salary(name: str, token: str = Depends(validate_token)):
 # Здесь тоже мы проверяем дейтсвует ли еще токен
 @app.get("/promotion_date/{name}")
 async def get_promotion_date(name: str, token: str = Depends(validate_token)):
+    if token not in tokens:
+        raise HTTPException(status_code=401, detail="Недействительный токен")
+
     username = token.split("_", 1)[1]
     promotion_date = await asyncio.to_thread(lambda: employees[username]["promotion_date"])
+
     return {"name": username,
             "promotion_date": promotion_date}
 
