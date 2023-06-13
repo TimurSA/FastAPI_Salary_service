@@ -16,6 +16,7 @@ import asyncio
 import uvicorn
 from datetime import datetime, timedelta
 from DataBase_Connection import collect_data
+from Hash_Function import sha256_hash
 
 app = FastAPI()
 
@@ -61,10 +62,10 @@ html_home = '''
 tokens = {}
 
 
-def generate_token(username: str) -> str:
+def generate_token(username: str, password: str) -> str:
     # Генерация токена, который будет действителен в течение 30 минут
     # Здесь располагается хеш-функция, но для примера просто будет простая строка
-    token = "token_" + username
+    token = sha256_hash(username + password)
     expiration = datetime.now() + timedelta(minutes=30)
     tokens[token] = expiration
     return token
@@ -88,7 +89,7 @@ async def get_token(login_data: LoginData):
     if username not in employees or password != employees[username]["password"]:
         raise HTTPException(status_code=401, detail="Неправильное имя пользователя или пароль")
 
-    token = generate_token(username)
+    token = generate_token(username, password)
 
     return {"token": token}
 
@@ -101,12 +102,11 @@ async def get():
 
 # Информация о зарплате
 # Сначала мы всегда проверяем дейтсвует ли еще токен
-@app.get("/salary/{name}")
-async def get_salary(name: str, token: str = Depends(validate_token)):
+@app.get("/salary/{username}")
+async def get_salary(username: str, token: str = Depends(validate_token)):
     if token not in tokens:
         raise HTTPException(status_code=401, detail="Недействительный токен")
 
-    username = token.split("_", 1)[1]
     salary = await asyncio.to_thread(lambda: employees[username]["salary"])
 
     return {"name": username,
@@ -115,12 +115,11 @@ async def get_salary(name: str, token: str = Depends(validate_token)):
 
 # Информация о дате повышение
 # Здесь тоже мы проверяем дейтсвует ли еще токен
-@app.get("/promotion_date/{name}")
-async def get_promotion_date(name: str, token: str = Depends(validate_token)):
+@app.get("/promotion_date/{username}")
+async def get_promotion_date(username: str, token: str = Depends(validate_token)):
     if token not in tokens:
         raise HTTPException(status_code=401, detail="Недействительный токен")
 
-    username = token.split("_", 1)[1]
     promotion_date = await asyncio.to_thread(lambda: employees[username]["promotion_date"])
 
     return {"name": username,

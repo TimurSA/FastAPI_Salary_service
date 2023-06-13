@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 import json
+from Hash_Function import sha256_hash
 
 client = TestClient(app)
 
@@ -14,24 +15,26 @@ async def test_home():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("name, password, expected", [("Alice", "123", "token_Alice"),
-                                                      ("Bob", "5235", "token_Bob"),
-                                                      ("Timur", "4124", "token_Timur"),
-                                                      ("Aidar", "1997", "token_Aidar")])
-async def test_post(name, password, expected):
+@pytest.mark.parametrize("name, password", [("Alice", "123"),
+                                            ("Bob", "5235"),
+                                            ("Timur", "4124"),
+                                            ("Aidar", "1997")])
+async def test_post(name, password):
+    expected = sha256_hash(name + password)
     response = client.post("/token", json={"username": name, "password": password})
     assert response.status_code == 200
     assert response.json() == {"token": expected}
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("name, password, token, salary", [("Alice", "123", "token_Alice", 5000),
-                                                           ("Bob", "5235", "token_Bob", 6000),
-                                                           ("Timur", "4124", "token_Timur", 1000000),
-                                                           ("Aidar", "1997", "token_Aidar", 99999)])
-async def test_get_salary(name, password, token, salary):
+@pytest.mark.parametrize("name, password, salary", [("Alice", "123", 5000),
+                                                    ("Bob", "5235", 6000),
+                                                    ("Timur", "4124", 1000000),
+                                                    ("Aidar", "1997", 99999)])
+async def test_get_salary(name, password, salary):
     response = client.post("/token", json={"username": name, "password": password})
     assert response.status_code == 200
+    token = response.json()['token']
     response = client.get(f"/salary/{name}?token={token}")
     assert response.status_code == 200
     assert response.json() == {'name': name,
@@ -39,13 +42,14 @@ async def test_get_salary(name, password, token, salary):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("name, password, token, promotion_date", [("Alice", "123", "token_Alice", "2023-07-07"),
-                                                                   ("Bob", "5235", "token_Bob", "2023-08-17"),
-                                                                   ("Timur", "4124", "token_Timur", "2023-07-04"),
-                                                                   ("Aidar", "1997", "token_Aidar", "2023-09-09")])
-async def test_get_promotion_date(name, password, token, promotion_date):
+@pytest.mark.parametrize("name, password, promotion_date", [("Alice", "123", "2023-07-07"),
+                                                            ("Bob", "5235", "2023-08-17"),
+                                                            ("Timur", "4124", "2023-07-04"),
+                                                            ("Aidar", "1997", "2023-09-09")])
+async def test_get_promotion_date(name, password, promotion_date):
     response = client.post("/token", json={"username": name, "password": password})
     assert response.status_code == 200
+    token = response.json()['token']
     response = client.get(f"/promotion_date/{name}?token={token}")
     assert response.status_code == 200
     assert response.json() == {'name': name,
